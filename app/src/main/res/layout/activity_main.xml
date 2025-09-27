@@ -13,12 +13,11 @@
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/captureButton"
+        app:layout_constraintBottom_toTopOf="@id/buttonBarLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="parent"
         />
-
-    <ImageView
+    <me.mengxiao.translatorlens.OCRImagePreviewView
         android:id="@+id/frozenPreviewImageView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -30,15 +29,34 @@
         app:layout_constraintEnd_toStartOf="@id/previewView"
         android:scaleType="centerCrop"
         android:visibility="gone" />
-
-    <Button
-        android:id="@+id/captureButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/capture_button_label"
+        android:id="@+id/buttonBarLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/previewView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/previewView" />
+        >
+        <Button
+            android:id="@+id/captureButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/capture_button_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/previewView" />
+        <Button
+            android:id="@+id/resetButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reset_button_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/previewView" />
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

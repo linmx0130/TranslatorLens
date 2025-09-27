@@ -2,6 +2,7 @@ package me.mengxiao.translatorlens
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.graphics.Rect
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
@@ -11,7 +12,16 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
-class OCROnImageCapturedCallback(private val onBitmapReady: (Bitmap) -> Unit): ImageCapture.OnImageCapturedCallback() {
+data class OCRDetectedTextBlock(
+    val text: String,
+    val boundingBox: Rect
+)
+
+class OCROnImageCapturedCallback(
+    private val onBitmapReady: (Bitmap) -> Unit,
+    private val onOCRResultReady: (List<OCRDetectedTextBlock>) -> Unit,
+): ImageCapture.OnImageCapturedCallback() {
+
     @OptIn(ExperimentalGetImage::class)
     override fun onCaptureSuccess(imageProxy: ImageProxy) {
         super.onCaptureSuccess(imageProxy)
@@ -19,15 +29,18 @@ class OCROnImageCapturedCallback(private val onBitmapReady: (Bitmap) -> Unit): I
         if (mediaImage != null) {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
             val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-            val result = recognizer.process(image)
+            recognizer.process(image)
                 .addOnSuccessListener { visionText ->
-                    val resultText = visionText.text
+                    val results = mutableListOf<OCRDetectedTextBlock>()
                     for (block in visionText.textBlocks) {
                         val blockText = block.text
-                        val blockCornerPoints = block.cornerPoints
-                        val blockFrame = block.boundingBox
-                        Log.d(TAG, "Detected: $blockText, box: $blockCornerPoints")
+                        val boundingBox = block.boundingBox
+                        if (boundingBox!=null) {
+                            Log.d(TAG, "Detected: $blockText, box: $boundingBox")
+                            results.add(OCRDetectedTextBlock(blockText, boundingBox))
+                        }
                     }
+                    onOCRResultReady(results)
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Failed to OCR: $e")

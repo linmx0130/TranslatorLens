@@ -3,21 +3,15 @@ package me.mengxiao.translatorlens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.util.Size
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -25,14 +19,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.common.util.concurrent.ListenableFuture
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private lateinit var previewView: PreviewView
-    private lateinit var frozenPreviewView: ImageView
+    private lateinit var frozenPreviewView: OCRImagePreviewView
     private lateinit var camera: Camera
     private lateinit var imageCapture: ImageCapture
     private var workloadExecutor = Executors.newSingleThreadExecutor()
@@ -58,8 +51,8 @@ class MainActivity : AppCompatActivity() {
             val cameraProvider = cameraProviderFuture.get()
             bindPreview(cameraProvider)
         }, ContextCompat.getMainExecutor(this))
-        val captureButton = findViewById<Button>(R.id.captureButton)
-        captureButton.setOnClickListener { onCaptureClick() }
+
+        setupButtonOnClick()
         // request permission
         val requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -101,11 +94,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onCaptureClick() {
-        imageCapture.takePicture(workloadExecutor, OCROnImageCapturedCallback { bitmap ->
-            ContextCompat.getMainExecutor(this).execute {
-                frozenPreviewView.setImageBitmap(bitmap)
-                frozenPreviewView.visibility = View.VISIBLE
-            }
-        })
+        imageCapture.takePicture(
+            workloadExecutor, OCROnImageCapturedCallback(
+                onBitmapReady = { bitmap ->
+                    ContextCompat.getMainExecutor(this).execute {
+                        frozenPreviewView.imageBitmap = bitmap
+                        frozenPreviewView.visibility = View.VISIBLE
+                    }
+                },
+                onOCRResultReady = { results ->
+                    frozenPreviewView.setOCRResult(results)
+                })
+        )
+    }
+
+    fun setupButtonOnClick(){
+        val captureButton = findViewById<Button>(R.id.captureButton)
+        captureButton.setOnClickListener { onCaptureClick() }
+        val resetButton = findViewById<Button>(R.id.resetButton)
+        resetButton.setOnClickListener {
+            frozenPreviewView.imageBitmap = null
+        }
     }
 }
