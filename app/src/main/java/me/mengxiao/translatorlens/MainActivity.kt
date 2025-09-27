@@ -3,11 +3,18 @@ package me.mengxiao.translatorlens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
 import android.util.Size
+import android.view.View
+import android.widget.Button
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
@@ -18,11 +25,17 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.common.util.concurrent.ListenableFuture
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var cameraProviderFuture : ListenableFuture<ProcessCameraProvider>
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private lateinit var previewView: PreviewView
+    private lateinit var frozenPreviewView: ImageView
+    private lateinit var camera: Camera
+    private lateinit var imageCapture: ImageCapture
+    private var workloadExecutor = Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,20 +46,30 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        // binding camera to the preview
         previewView = findViewById<PreviewView>(R.id.previewView)
+        frozenPreviewView = findViewById(R.id.frozenPreviewImageView)
         previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-        previewView.scaleType= PreviewView.ScaleType.FIT_CENTER
+        previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener(Runnable {
             val cameraProvider = cameraProviderFuture.get()
             bindPreview(cameraProvider)
         }, ContextCompat.getMainExecutor(this))
+        val captureButton = findViewById<Button>(R.id.captureButton)
+        captureButton.setOnClickListener { onCaptureClick() }
+        // request permission
         val requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) {
                 // do nothing
             }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             // Permission is not granted, request it
             requestPermissionLauncher.launch(
                 Manifest.permission.CAMERA
@@ -54,16 +77,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun bindPreview(cameraProvider : ProcessCameraProvider) {
-        var preview : Preview = Preview.Builder()
+    fun bindPreview(cameraProvider: ProcessCameraProvider) {
+        val preview: Preview = Preview.Builder()
             .build()
 
-        var cameraSelector : CameraSelector = CameraSelector.Builder()
+        val cameraSelector: CameraSelector = CameraSelector.Builder()
             .requireLensFacing(CameraSelector.LENS_FACING_BACK)
             .build()
 
-        preview.surfaceProvider =previewView.getSurfaceProvider()
+        preview.surfaceProvider = previewView.getSurfaceProvider()
 
-        var camera = cameraProvider.bindToLifecycle(this as LifecycleOwner, cameraSelector, preview)
+        imageCapture = ImageCapture.Builder()
+            .setTargetRotation(previewView.display.rotation)
+            .build()
+
+
+        camera = cameraProvider.bindToLifecycle(
+            this as LifecycleOwner,
+            cameraSelector,
+            imageCapture,
+            preview
+        )
+    }
+
+    fun onCaptureClick() {
+        imageCapture.takePicture(workloadExecutor, OCROnImageCapturedCallback { bitmap ->
+            ContextCompat.getMainExecutor(this).execute {
+                frozenPreviewView.setImageBitmap(bitmap)
+                frozenPreviewView.visibility = View.VISIBLE
+            }
+        })
     }
 }

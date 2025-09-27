@@ -10,6 +10,8 @@ material = "1.13.0"
 activity = "1.8.0"
 constraintlayout = "2.2.1"
 camerax = "1.5.0"
+mlkit = "16.0.1"
+visionCommon = "17.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -24,6 +26,10 @@ androidx-camera-core = {group="androidx.camera", name="camera-core", version.ref
 androidx-camera-camera2 = {group="androidx.camera", name="camera-camera2", version.ref="camerax"}
 androidx-camera-lifecycle = {group="androidx.camera", name="camera-lifecycle", version.ref="camerax"}
 androidx-camera-view = {group="androidx.camera", name="camera-view", version.ref="camerax"}
+mlkit-text-recognition = {group="com.google.mlkit", name="text-recognition", version.ref="mlkit"}
+mlkit-text-recognition-japanese = {group="com.google.mlkit", name="text-recognition-japanese", version.ref="mlkit"}
+vision-common = { group = "com.google.mlkit", name = "vision-common", version.ref = "visionCommon" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

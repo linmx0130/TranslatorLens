@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">TranslatorLens</string>
+    <string name="capture_button_label">Capture</string>
+    <string name="frozen_preview_content_description">Captured image for translation</string>
 </resources>
