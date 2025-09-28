@@ -16,8 +16,11 @@ data class OCRDisplayedTextBlock(
     val boundingBox: RectF
 )
 class OCRImagePreviewView(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int): View(context, attrs, defStyleAttr, defStyleRes) {
-    private val paint: Paint = Paint()
+    fun interface OnOCRBoundingBoxClickListener {
+        fun onBoundingBoxClick(text: String, boundingBox: RectF)
+    }
 
+    private val paint: Paint = Paint()
     constructor(context: Context) : this(context, null, 0, 0)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(
@@ -34,6 +37,7 @@ class OCRImagePreviewView(context: Context, attrs: AttributeSet?, defStyleAttr: 
             invalidate()
         }
     private var ocrResults: List<OCRDisplayedTextBlock>? = null
+    var onOCRBoundingBoxClickListener: OnOCRBoundingBoxClickListener? = null
 
     init {
         paint.style = Paint.Style.FILL
@@ -86,6 +90,10 @@ class OCRImagePreviewView(context: Context, attrs: AttributeSet?, defStyleAttr: 
                         val displayedBox = item.boundingBox
                         if (displayedBox.left <= event.x && displayedBox.right >= event.x && displayedBox.top <= event.y && displayedBox.bottom >= event.y) {
                             Log.d("OCRImagePreviewViewTouch", item.text)
+                            onOCRBoundingBoxClickListener?.onBoundingBoxClick(
+                                item.text,
+                                item.boundingBox
+                            )
                             return@let true
                         }
                     }

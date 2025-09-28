@@ -10,7 +10,7 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 
 data class OCRDetectedTextBlock(
     val text: String,
@@ -28,7 +28,7 @@ class OCROnImageCapturedCallback(
         val mediaImage = imageProxy.image
         if (mediaImage != null) {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+            val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
             recognizer.process(image)
                 .addOnSuccessListener { visionText ->
                     val results = mutableListOf<OCRDetectedTextBlock>()

@@ -2,9 +2,12 @@ package me.mengxiao.translatorlens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.RectF
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +21,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.common.util.concurrent.ListenableFuture
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 
@@ -29,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var camera: Camera
     private lateinit var imageCapture: ImageCapture
     private var workloadExecutor = Executors.newSingleThreadExecutor()
+
+    private var modelRunnerHolder = LeapModelRunnerHolder(lifecycleScope)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +50,18 @@ class MainActivity : AppCompatActivity() {
         // binding camera to the preview
         previewView = findViewById<PreviewView>(R.id.previewView)
         frozenPreviewView = findViewById(R.id.frozenPreviewImageView)
+        frozenPreviewView.onOCRBoundingBoxClickListener = object: OCRImagePreviewView.OnOCRBoundingBoxClickListener {
+            override fun onBoundingBoxClick(
+                text: String,
+                boundingBox: RectF
+            ) {
+                lifecycleScope.launch {
+                    val translateResult = modelRunnerHolder.translateJapaneseToEnglish(text)
+                    Log.d("MainActivity", translateResult)
+                    Toast.makeText(this@MainActivity, translateResult, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
         previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
         previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
 
