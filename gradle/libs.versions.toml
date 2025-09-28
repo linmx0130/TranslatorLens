@@ -13,6 +13,10 @@ camerax = "1.5.0"
 mlkit = "16.0.1"
 visionCommon = "17.3.0"
 leap = "0.5.0"
+lifecycleRuntimeKtx = "2.6.1"
+composeRuntime = "1.9.0"
+activityCompose = "1.11.0"
+composeBom = "2024.09.00"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,8 +35,20 @@ mlkit-text-recognition = {group="com.google.mlkit", name="text-recognition", ver
 mlkit-text-recognition-chinese = {group="com.google.mlkit", name="text-recognition-chinese", version.ref="mlkit"}
 vision-common = { group = "com.google.mlkit", name = "vision-common", version.ref = "visionCommon" }
 leap-sdk = {group="ai.liquid.leap", name="leap-sdk", version.ref="leap"}
-
+leap-downloader = {group="ai.liquid.leap", name ="leap-model-downloader", version.ref="leap"}
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name="runtime-livedata", version.ref = "composeRuntime"}
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 

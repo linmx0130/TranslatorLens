@@ -10,13 +10,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 
-class LeapModelRunnerHolder(private val coroutineScope: CoroutineScope){
+class LeapModelRunnerHolder(coroutineScope: CoroutineScope, modelPath: String){
     private lateinit var modelRunner: ModelRunner
     init {
         coroutineScope.launch {
-            // modelRunner = LeapClient.loadModel("/data/local/tmp/liquid/LFM2-350M.bundle")
-            // modelRunner = LeapClient.loadModel("/data/local/tmp/liquid/lfm2-350m-enjpmt.bundle")
-            modelRunner = LeapClient.loadModel("/data/local/tmp/liquid/qwen3-0_6b.bundle")
+            modelRunner = LeapClient.loadModel(modelPath)
         }
     }
 
@@ -25,6 +23,20 @@ class LeapModelRunnerHolder(private val coroutineScope: CoroutineScope){
             delay(100L)
         }
         val conversation = modelRunner.createConversation("Translate from Chinese to English.")
+        val result = StringBuilder()
+        conversation.generateResponse(text).onEach {
+            if (it is MessageResponse.Chunk) {
+                result.append(it.text)
+            }
+        }.collect()
+        return result.toString()
+    }
+
+    suspend fun translateEnglishToChinese(text: String): String {
+        while (!this::modelRunner.isInitialized) {
+            delay(100L)
+        }
+        val conversation = modelRunner.createConversation("将英文内容翻译为中文。")
         val result = StringBuilder()
         conversation.generateResponse(text).onEach {
             if (it is MessageResponse.Chunk) {

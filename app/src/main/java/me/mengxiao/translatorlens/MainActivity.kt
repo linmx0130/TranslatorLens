@@ -35,13 +35,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageCapture: ImageCapture
     private lateinit var outputTextView: TextView
 
+    private lateinit var translationCase: TranslationCase
+
     private var workloadExecutor = Executors.newSingleThreadExecutor()
     private var isTranslating = false
 
-    private var modelRunnerHolder = LeapModelRunnerHolder(lifecycleScope)
+    private lateinit var modelRunnerHolder: LeapModelRunnerHolder
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        translationCase = intent.getParcelableExtra("case", TranslationCase::class.java)!!
+        val modelPath = intent.getStringExtra("model")!!
+        modelRunnerHolder = LeapModelRunnerHolder(lifecycleScope, modelPath)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -66,7 +71,10 @@ class MainActivity : AppCompatActivity() {
                     isTranslating = true
                     outputTextView.text = "Translating:\n$text"
                     lifecycleScope.launch {
-                        val translateResult = modelRunnerHolder.translateChineseToEnglish(text)
+                        val translateResult = when(translationCase) {
+                            TranslationCase.ChineseToEnglish -> modelRunnerHolder.translateChineseToEnglish(text)
+                            TranslationCase.EnglishToChinese -> modelRunnerHolder.translateEnglishToChinese(text)
+                        }
                         Log.d("MainActivity", translateResult)
                         outputTextView.text = "Translation result:\n$translateResult"
                         isTranslating = false
