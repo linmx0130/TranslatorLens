@@ -20,11 +20,11 @@ class LeapModelRunnerHolder(private val coroutineScope: CoroutineScope){
         }
     }
 
-    suspend fun translateJapaneseToEnglish(text: String): String {
+    suspend fun translateChineseToEnglish(text: String): String {
         while (!this::modelRunner.isInitialized) {
             delay(100L)
         }
-        val conversation = modelRunner.createConversation("Translate the Japanese content to English. Be accurate. Do not add any other content.")
+        val conversation = modelRunner.createConversation("Translate from Chinese to English.")
         val result = StringBuilder()
         conversation.generateResponse(text).onEach {
             if (it is MessageResponse.Chunk) {

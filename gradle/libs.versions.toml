@@ -28,7 +28,7 @@ androidx-camera-camera2 = {group="androidx.camera", name="camera-camera2", versi
 androidx-camera-lifecycle = {group="androidx.camera", name="camera-lifecycle", version.ref="camerax"}
 androidx-camera-view = {group="androidx.camera", name="camera-view", version.ref="camerax"}
 mlkit-text-recognition = {group="com.google.mlkit", name="text-recognition", version.ref="mlkit"}
-mlkit-text-recognition-japanese = {group="com.google.mlkit", name="text-recognition-japanese", version.ref="mlkit"}
+mlkit-text-recognition-chinese = {group="com.google.mlkit", name="text-recognition-chinese", version.ref="mlkit"}
 vision-common = { group = "com.google.mlkit", name = "vision-common", version.ref = "visionCommon" }
 leap-sdk = {group="ai.liquid.leap", name="leap-sdk", version.ref="leap"}
 

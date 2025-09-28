@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -33,7 +33,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var frozenPreviewView: OCRImagePreviewView
     private lateinit var camera: Camera
     private lateinit var imageCapture: ImageCapture
+    private lateinit var outputTextView: TextView
+
     private var workloadExecutor = Executors.newSingleThreadExecutor()
+    private var isTranslating = false
 
     private var modelRunnerHolder = LeapModelRunnerHolder(lifecycleScope)
 
@@ -50,18 +53,26 @@ class MainActivity : AppCompatActivity() {
         // binding camera to the preview
         previewView = findViewById<PreviewView>(R.id.previewView)
         frozenPreviewView = findViewById(R.id.frozenPreviewImageView)
-        frozenPreviewView.onOCRBoundingBoxClickListener = object: OCRImagePreviewView.OnOCRBoundingBoxClickListener {
-            override fun onBoundingBoxClick(
-                text: String,
-                boundingBox: RectF
-            ) {
-                lifecycleScope.launch {
-                    val translateResult = modelRunnerHolder.translateJapaneseToEnglish(text)
-                    Log.d("MainActivity", translateResult)
-                    Toast.makeText(this@MainActivity, translateResult, Toast.LENGTH_LONG).show()
+        outputTextView = findViewById(R.id.outputTextView)
+        frozenPreviewView.onOCRBoundingBoxClickListener =
+            object : OCRImagePreviewView.OnOCRBoundingBoxClickListener {
+                override fun onBoundingBoxClick(
+                    text: String,
+                    boundingBox: RectF
+                ) {
+                    if (isTranslating) {
+                        return
+                    }
+                    isTranslating = true
+                    outputTextView.text = "Translating:\n$text"
+                    lifecycleScope.launch {
+                        val translateResult = modelRunnerHolder.translateChineseToEnglish(text)
+                        Log.d("MainActivity", translateResult)
+                        outputTextView.text = "Translation result:\n$translateResult"
+                        isTranslating = false
+                    }
                 }
             }
-        }
         previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
         previewView.scaleType = PreviewView.ScaleType.FIT_CENTER
 
@@ -127,12 +138,20 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun setupButtonOnClick(){
+    fun setupButtonOnClick() {
         val captureButton = findViewById<Button>(R.id.captureButton)
-        captureButton.setOnClickListener { onCaptureClick() }
         val resetButton = findViewById<Button>(R.id.resetButton)
+
+        captureButton.setOnClickListener {
+            captureButton.visibility = View.GONE
+            resetButton.visibility = View.VISIBLE
+            onCaptureClick()
+        }
         resetButton.setOnClickListener {
+            captureButton.visibility = View.VISIBLE
+            resetButton.visibility = View.GONE
             frozenPreviewView.imageBitmap = null
+            outputTextView.text = ""
         }
     }
 }
