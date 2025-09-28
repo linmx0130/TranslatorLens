@@ -3,5 +3,4 @@
     <string name="capture_button_label">Capture</string>
     <string name="reset_button_label">Reset</string>
     <string name="frozen_preview_content_description">Captured image for translation</string>
-    <string name="title_activity_welcome">WelcomeActivity</string>
 </resources>
